@@ -1,24 +1,50 @@
 import 'package:flutter/material.dart';
-import 'todo.dart'; // Make sure to import your Todo class
+import 'todo_functions.dart';
 
 void main() {
-  runApp(MaterialApp(
-    home: TodoList(),
-  ));
+  runApp(MyApp());
 }
 
-class TodoList extends StatefulWidget {
+class MyApp extends StatelessWidget {
   @override
-  _TodoListState createState() => _TodoListState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: MyHomePage(),
+    );
+  }
 }
 
-class _TodoListState extends State<TodoList> {
-  final List<Todo> todos = [
-    // Add some example todos
-    Todo(id: 1, title: 'Todo 1', description: 'This is the first todo'),
-    Todo(id: 2, title: 'Todo 2', description: 'This is the second todo'),
-    // Add more todos here
-  ];
+class MyHomePage extends StatefulWidget {
+  MyHomePage({Key? key}) : super(key: key);
+
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  final List<String> _todoItems = [];
+
+  void _addTodoItem(String title) {
+    setState(() {
+      _todoItems.add(title);
+    });
+  }
+
+  void _deleteTodoItem(int index) {
+    setState(() {
+      _todoItems.removeAt(index);
+    });
+  }
+
+  void _editTodoItem(int index, String newText) {
+    setState(() {
+      _todoItems[index] = newText;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,17 +53,23 @@ class _TodoListState extends State<TodoList> {
         title: Text('Todo List'),
       ),
       body: ListView.builder(
-        itemCount: todos.length,
+        itemCount: _todoItems.length,
         itemBuilder: (context, index) {
           return ListTile(
-            title: Text(todos[index].title),
-            subtitle: Text(todos[index].description),
-            trailing: Checkbox(
-              value: todos[index].isDone,
-              onChanged: (bool? value) {
-                setState(() {
-                  todos[index].isDone = value!;
-                });
+            title: Text(_todoItems[index]),
+            onTap: () {
+              editTodoItem(
+                context,
+                _todoItems[index],
+                (newText) {
+                  _editTodoItem(index, newText);
+                },
+              );
+            },
+            trailing: IconButton(
+              icon: Icon(Icons.delete),
+              onPressed: () {
+                _deleteTodoItem(index);
               },
             ),
           );
@@ -45,10 +77,15 @@ class _TodoListState extends State<TodoList> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Add your onPressed code here!
+          editTodoItem(
+            context,
+            '',
+            (newText) {
+              _addTodoItem(newText);
+            },
+          );
         },
         child: Icon(Icons.add),
-        backgroundColor: Colors.green,
       ),
     );
   }
